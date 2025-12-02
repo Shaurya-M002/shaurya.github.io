@@ -8,17 +8,33 @@
 import frontmatter
 import glob
 import getorg
+import yaml
 from geopy import Nominatim
 from geopy.exc import GeocoderTimedOut
+from urllib.parse import urlparse
 
 # Set the default timeout, in seconds
 TIMEOUT = 5
+
+# Read website URL from config file
+try:
+    with open('_config.yml', 'r') as config_file:
+        config = yaml.safe_load(config_file)
+        site_url = config.get('url', 'academicpages.github.io')
+        # Extract domain from URL
+        if site_url.startswith('http'):
+            site_domain = urlparse(site_url).netloc
+        else:
+            site_domain = site_url
+except FileNotFoundError:
+    print("Warning: _config.yml not found, using default user_agent")
+    site_domain = "academicpages.github.io"
 
 # Collect the Markdown files
 g = glob.glob("_talks/*.md")
 
 # Prepare to geolocate
-geocoder = Nominatim(user_agent="academicpages.github.io")
+geocoder = Nominatim(user_agent=site_domain)
 location_dict = {}
 location = ""
 permalink = ""
